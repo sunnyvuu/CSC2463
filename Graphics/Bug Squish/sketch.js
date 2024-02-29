@@ -26,14 +26,6 @@ function setup() {
   imageMode(CENTER);
 }
 
-function startContext() {
-  console.log("Tone is: ", Tone.context.state);
-  document.body.addEventListener("click", () => {
-    Tone.context.resume();
-    console.log("Tone is: ", Tone.context.state);
-  });
-}
-
 function mouseClicked() {
   // to transition from start screen to play screen
   if (screen == 0) {
