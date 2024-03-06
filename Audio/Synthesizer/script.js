@@ -40,13 +40,13 @@ function keyPressed() {
       break;
     case "W":
       note = "C#4";
-      break; // Black key
+      break;
     case "S":
       note = "D4";
       break;
     case "E":
       note = "D#4";
-      break; // Black key
+      break;
     case "D":
       note = "E4";
       break;
@@ -55,25 +55,25 @@ function keyPressed() {
       break;
     case "T":
       note = "F#4";
-      break; // Black key
+      break;
     case "G":
       note = "G4";
       break;
     case "Y":
       note = "G#4";
-      break; // Black key
+      break;
     case "H":
       note = "A4";
       break;
     case "U":
       note = "A#4";
-      break; // Black key
+      break;
     case "J":
       note = "B4";
       break;
     case "K":
       note = "C5";
-      break; // Completing the octave
+      break;
   }
   if (note) polySynth.triggerAttack(note);
 }
