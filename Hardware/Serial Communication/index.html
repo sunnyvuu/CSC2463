@@ -12,57 +12,74 @@
       type="text/javascript"
       src="https://cdn.jsdelivr.net/npm/p5.serialserver@0.0.28/lib/p5.serialport.js"
     ></script>
+    <link rel="stylesheet" href="../../css/mainstyles.css" />
+    <style>
+      .info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+      }
+      .divy {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    </style>
   </head>
   <body>
+    <li><a href="../../index.html"> Home </a></li>
     <h1>P5.js and Arduino Interaction Explained</h1>
-    <p>
-      This web application demonstrates a dynamic interaction between a
-      web-based interface and a physical computing device using P5.js and
-      Arduino.
-    </p>
-    <h2>Functionality Overview</h2>
-    <ul>
-      <li>
-        <strong>Joystick Control:</strong> The X and Y positions of a joystick
-        are read by the Arduino, which sends these positions to the sketch
-        running in this web page. The positions are used to dynamically change
-        the background color of the page:
-      </li>
-      <ul>
-        <li>Moving the joystick up turns the background green.</li>
-        <li>Moving it down turns the background red.</li>
-        <li>Moving it left turns the background blue.</li>
-        <li>Moving it right turns the background yellow.</li>
-        <li>Positioning it in the center resets the background to white.</li>
+    <div class="divy">
+      <p>
+        This web application demonstrates a dynamic interaction between a
+        web-based interface and a physical computing device using P5.js and
+        Arduino.
+      </p>
+      <h2>Functionality Overview</h2>
+      <ul class="info">
+        <li>
+          <strong>Joystick Control:</strong> The X and Y positions of a joystick
+          are read by the Arduino, which sends these positions to the sketch
+          running in this web page. The positions are used to dynamically change
+          the background color of the page:
+        </li>
+        <ul>
+          <li>Moving the joystick up turns the background green.</li>
+          <li>Moving it down turns the background red.</li>
+          <li>Moving it left turns the background blue.</li>
+          <li>Moving it right turns the background yellow.</li>
+          <li>Positioning it in the center resets the background to white.</li>
+        </ul>
+        <li>
+          <strong>LED Control:</strong> Pressing the 'R' and 'B' keys on the
+          keyboard toggles red and blue LEDs, respectively, connected to the
+          Arduino. This feature allows users to interact with physical hardware
+          through digital input from the keyboard.
+        </li>
+        <li>
+          <strong>Serial Communication:</strong> The sketch uses serial
+          communication to transmit joystick data from the Arduino to the web
+          application and send control commands from the web application back to
+          the Arduino to manage LED states.
+        </li>
+        <li>
+          <strong>Dynamic Serial Port Selection:</strong> Users can update the
+          serial port through an HTML input field, allowing flexibility
+          depending on which port the Arduino is connected to.
+        </li>
       </ul>
-      <li>
-        <strong>LED Control:</strong> Pressing the 'R' and 'B' keys on the
-        keyboard toggles red and blue LEDs, respectively, connected to the
-        Arduino. This feature allows users to interact with physical hardware
-        through digital input from the keyboard.
-      </li>
-      <li>
-        <strong>Serial Communication:</strong> The sketch uses serial
-        communication to transmit joystick data from the Arduino to the web
-        application and send control commands from the web application back to
-        the Arduino to manage LED states.
-      </li>
-      <li>
-        <strong>Dynamic Serial Port Selection:</strong> Users can update the
-        serial port through an HTML input field, allowing flexibility depending
-        on which port the Arduino is connected to.
-      </li>
-    </ul>
-    <p>
-      Ensure the p5.serialcontrol application is running and configured
-      correctly to facilitate communication between the Arduino and this web
-      page.
-    </p>
-    <p>
-      <a href="https://github.com/p5-serial/p5.serialserver" target="_blank"
-        >Click here for more information on setting up the p5.serialserver.</a
-      >
-    </p>
+      <p>
+        Ensure the p5.serialcontrol application is running and configured
+        correctly to facilitate communication between the Arduino and this web
+        page.
+      </p>
+      <p>
+        <a href="https://github.com/p5-serial/p5.serialserver" target="_blank"
+          >Click here for more information on setting up the p5.serialserver.</a
+        >
+      </p>
+    </div>
     <script src="sketch.js"></script>
   </body>
 </html>

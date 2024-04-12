@@ -70,10 +70,13 @@ function gotRawData(data) {
 }
 
 function keyPressed() {
+  console.log("Key pressed: " + key); // Log the pressed key to the console
   if (key === "R" || key === "r") {
     serial.write("R"); // Send 'R' to toggle the Red LED
+    console.log("Sending 'R' to Arduino");
   }
   if (key === "B" || key === "b") {
     serial.write("B"); // Send 'B' to toggle the Blue LED
+    console.log("Sending 'B' to Arduino");
   }
 }
