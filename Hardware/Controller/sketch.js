@@ -1,28 +1,25 @@
-var guy = [];
-var speed = 1;
-var score = 0;
-var count = 25;
-var timer = 30;
-var screen = 0;
-var bg;
-var bgm;
-var squish_sound;
-var bgm_end;
+// Game settings and variables
+let guy = [];
+let speed = 1;
+let score = 0;
+let count = 25;
+let timer = 30;
+let screen = 0;
+let mappedX = 0;
+let mappedY = 0;
 
+// Game resources (images and sounds)
+let bg, bgm, squish_sound, bgm_end;
+
+// Serial communication variables
+let serial;
+let serialPortName = "COM4"; // Change this to match your port
+
+// Preload resources
 function preload() {
-  for (var i = 0; i < count; i++) {
-    guy[i] = new Walker(
-      "https://res.cloudinary.com/dtjsaaj5f/image/upload/v1584928241/roach_mg12yv.png",
-      random(1280),
-      random(480),
-      random([-2, -1, 1, 2]),
-      1
-    );
-  }
   bg = loadImage(
     "https://res.cloudinary.com/dtjsaaj5f/image/upload/v1584928241/floor_ksmmjj.jpg"
   );
-
   bgm = new Tone.Player(
     "https://res.cloudinary.com/dtjsaaj5f/video/upload/v1584928263/bgm_kaiel7.mp3"
   ).toMaster();
@@ -32,35 +29,46 @@ function preload() {
   bgm_end = new Tone.Player(
     "https://res.cloudinary.com/dtjsaaj5f/video/upload/v1584928262/game_over_blzyjy.mp3"
   ).toMaster();
+
+  for (let i = 0; i < count; i++) {
+    guy[i] = new Walker(
+      "https://res.cloudinary.com/dtjsaaj5f/image/upload/v1584928241/roach_mg12yv.png",
+      random(1280),
+      random(480),
+      random([-2, -1, 1, 2]),
+      1
+    );
+  }
 }
+
+// Setup environment
 function setup() {
   createCanvas(1280, 480);
   textSize(32);
   imageMode(CENTER);
+
+  // Initialize serial communication
+  serial = new p5.SerialPort();
+  serial.open(serialPortName);
+  serial.on("connected", serverConnected);
+  serial.on("data", gotData);
+  serial.on("error", gotError);
+  serial.on("open", gotOpen);
 }
 
-function startContext() {
-  console.log("Tone is: ", Tone.context.state);
-  document.body.addEventListener("click", () => {
-    Tone.context.resume();
-    console.log("Tone is: ", Tone.context.state);
-  });
-}
+// Main drawing loop
+function draw() {
+  if (screen === 0) {
+    startScreen();
+  } else if (screen === 1) {
+    playScreen();
 
-function mouseClicked() {
-  // to transition from start screen to play screen
-  if (screen == 0) {
-    bgm.start();
-    bgm.loop = true;
-    screen = 1;
-  }
-
-  // if click on Walker
-  for (var i = 0; i < count; i++) {
-    guy[i].kill(mouseX, mouseY);
+    fill(255, 0, 0); // Red color
+    ellipse(mappedX, mappedY, 10, 10); // Draw a small ellipse at mapped X and Y coordinates
   }
 }
 
+// Display start screen
 function startScreen() {
   background(100);
   fill(255);
@@ -69,6 +77,7 @@ function startScreen() {
   text("click to start", width / 2, height / 2 + 40);
 }
 
+// Display play screen
 function playScreen() {
   push();
   imageMode(CORNER);
@@ -78,33 +87,89 @@ function playScreen() {
   for (var i = 0; i < count; i++) {
     guy[i].draw();
   }
+
+  displayGameInfo();
+}
+
+// Display game info like score and timer
+function displayGameInfo() {
   text("Score: " + score, 70, 30);
   text("Time Left: " + timer, 1180, 30);
-  if (timer == 0) {
-    //if timer hits 0
-    bgm.stop();
-    textSize(50);
-    text("GAME OVER", width / 2, height / 2);
-    text("You scored: " + score, width / 2, height / 2 + 40);
-    text("Refresh to play again.", width / 2, height / 2 + 80);
-    bgm_end.start();
-    undraw();
-  }
+  checkGameEnd();
+}
 
-  if (score == 25) {
-    //if all roaches are killed
-    bgm.stop();
-    score += timer;
-    textSize(50);
-    text("YOU WIN", width / 2, height / 2);
-    text("You scored: " + score, width / 2, height / 2 + 40);
-    text("Refresh to play again.", width / 2, height / 2 + 80);
-    bgm_end.start();
-    undraw();
+// Check for game over conditions
+function checkGameEnd() {
+  if (timer == 0) {
+    endGame("GAME OVER");
+  } else if (score == 25) {
+    endGame("YOU WIN");
   }
-  if (frameCount % 60 == 0 && timer > 0) {
-    timer--; //decrements timer by 1 every 60 frames
+  if (frameCount % 60 == 0 && timer > 0) timer--;
+}
+
+// End the game and display the final screen
+function endGame(message) {
+  bgm.stop();
+  textSize(50);
+  text(message, width / 2, height / 2);
+  text("You scored: " + score, width / 2, height / 2 + 40);
+  text("Refresh to play again.", width / 2, height / 2 + 80);
+  bgm_end.start();
+  noLoop();
+}
+
+function gotData() {
+  let currentString = serial.readLine().trim();
+  if (!currentString.length) return; // Exit if the string is empty
+
+  // Parse the incoming data
+  let [x, y, btnPressed] = currentString
+    .split(",")
+    .map((n) => parseInt(n.trim(), 10));
+
+  // Map the joystick values to the canvas coordinates
+  mappedX = map(x, 0, 1023, 0, width);
+  mappedY = map(y, 0, 1023, 0, height);
+
+  // Check if the joystick button is pressed
+  if (btnPressed) {
+    // Joystick button is pressed
+    handleJoystickButton(mappedX, mappedY);
   }
+}
+
+function handleJoystickButton(x, y) {
+  if (screen === 0) {
+    startGame(); // This function should change the `screen` to 1 and log output
+  } else if (screen === 1) {
+    checkForSquish(x, y); // Ensure this checks for squishes accurately
+  }
+}
+
+function startGame() {
+  console.log("Game starting"); // Confirm this executes
+  bgm.start();
+  bgm.loop = true;
+  screen = 1;
+}
+
+function checkForSquish(x, y) {
+  for (let i = 0; i < count; i++) {
+    guy[i].kill(x, y);
+  }
+}
+
+function serverConnected() {
+  console.log("Connected to server.");
+}
+
+function gotOpen() {
+  console.log("Serial port is open.");
+}
+
+function gotError(error) {
+  console.log("Serial port error: " + error);
 }
 
 function Walker(imageName, x, y, moving, alive) {
@@ -191,12 +256,4 @@ function Walker(imageName, x, y, moving, alive) {
     }
     pop();
   };
-}
-
-function draw() {
-  if (screen == 0) {
-    startScreen();
-  } else if (screen == 1) {
-    playScreen();
-  }
 }
